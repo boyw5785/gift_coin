@@ -1,15 +1,14 @@
 module gift_coin::main {
     use std::option;
 
-    use sui::object::{Self, UID, ID};
-    use sui::tx_context::{TxContext};
-    use sui::balance::{Self, Supply};
+    use sui::object::{self, UID, ID};
+    use sui::tx_context::{self, TxContext};
+    use sui::balance::{self, Supply};
     use sui::transfer;
-    use sui::coin::{Self, Coin};
+    use sui::coin::{self, Coin};
     use sui::package::{Publisher};
-    use sui::tx_context;
-    use sui::vec_set::{Self, VecSet};
-    use sui::table::{Self, Table};
+    use sui::vec_set::{self, VecSet};
+    use sui::table::{self, Table};
 
     // Error code for unauthorized actions
     const ERROR_UNAUTHORIZED: u64 = 1;
@@ -29,7 +28,7 @@ module gift_coin::main {
     struct AdminCap has key { id: UID }
 
     // Initializer function to create the token and set up the initial state
-    fun init(witness: MAIN, ctx: &mut TxContext) {
+    public entry fun init(witness: MAIN, ctx: &mut TxContext) {
         // Create the MAIN token with specified properties
         let (treasury, metadata) = coin::create_currency<MAIN>(
             witness,
@@ -62,7 +61,7 @@ module gift_coin::main {
     }
 
     // Function to mint new tokens and transfer them to a recipient
-    public fun mint(
+    public entry fun mint(
         publisher: &Publisher,
         storage: &mut Storage,
         recipient: address,
@@ -83,7 +82,7 @@ module gift_coin::main {
     }
 
     // Function to burn a specified amount of tokens from a recipient's balance
-    public fun burn(
+    public entry fun burn(
         publisher: &Publisher,
         storage: &mut Storage,
         recipient: address,
@@ -224,5 +223,10 @@ module gift_coin::main {
         ctx: &mut TxContext
     ): Coin<MAIN> {
         coin::from_balance(balance::increase_supply(&mut storage.supply, amount), ctx)
+    }
+
+    // New Feature: View the list of managers
+    public fun get_managers(storage: &Storage): vector<ID> {
+        vec_set::elements(&storage.managers)
     }
 }
